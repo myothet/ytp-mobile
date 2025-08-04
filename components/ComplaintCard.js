@@ -11,7 +11,11 @@ const ComplaintCard = ({ complaint, onPress }) => {
       ]}
     >
       <Text style={styles.name}>{complaint.customer_name}</Text>
-      <Text style={styles.phone}>{complaint.contact_phone}</Text>
+      <Text style={styles.label}>Phone:</Text>
+        {complaint.contact_phone?.split(',').map((num, idx) => (
+            <Text key={idx} style={styles.detail}>📞 {num.trim()}</Text>
+        ))}
+
     </Pressable>
   );
 };

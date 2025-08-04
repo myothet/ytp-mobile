@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await axios.post(' http://192.168.1.7:8000/auth/token/login/', {
+      const response = await axios.post(' http://192.168.1.8:8000/auth/token/login/', {
         username,
         password,
       });

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Button,
 } from 'react-native';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,7 +23,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await axios.get(
-        'http://192.168.1.7:8000/api/complaints/?resolution_status=Pending',
+        'http://192.168.1.8:8000/api/complaints/?resolution_status=Pending',
         {
           headers: { Authorization: `Token ${token}` },
         }
@@ -34,6 +35,19 @@ const HomeScreen = ({ navigation }) => {
       setLoading(false);
     }
   };
+
+  // Auto fetch every 15 seconds
+  useEffect(() => {
+    if (!token) return;
+
+    fetchComplaints(); // initial fetch
+
+    const intervalId = setInterval(() => {
+      fetchComplaints();
+    }, 15000);
+
+    return () => clearInterval(intervalId);
+  }, [token]);
 
   useFocusEffect(
     useCallback(() => {
@@ -50,6 +64,11 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Pending Complaints</Text>
+
+      {/* Add Refresh button */}
+      <View style={{ marginBottom: 10 }}>
+        <Button title="Refresh" onPress={fetchComplaints} />
+      </View>
 
       {loading ? (
         <ActivityIndicator size="large" color="#007bff" />
