@@ -1,49 +1,48 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  ActivityIndicator,
-  RefreshControl,
-  Button,
-} from 'react-native';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ComplaintCard from './ComplaintCard';
 import { useFocusEffect } from '@react-navigation/native';
+import { View, Text, ScrollView, ActivityIndicator, RefreshControl, Button, StyleSheet } from 'react-native';
+import axios from 'axios';
+import isEqual from 'lodash.isequal';
 
 const HomeScreen = ({ navigation }) => {
   const { token } = useAuth();
   const [complaints, setComplaints] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true); // only for initial load
+  const [refreshing, setRefreshing] = useState(false); // for pull to refresh & auto updates
 
-  const fetchComplaints = async () => {
+  const fetchComplaints = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isRefresh) setLoading(true);
+      if (isRefresh) setRefreshing(true);
+
       const response = await axios.get(
         'http://192.168.1.8:8000/api/complaints/?resolution_status=Pending',
         {
           headers: { Authorization: `Token ${token}` },
         }
       );
-      setComplaints(response.data.results);
+
+      const newData = response.data.results;
+
+      if (!isEqual(newData, complaints)) {
+        setComplaints(newData);
+      }
     } catch (error) {
       console.error('Error fetching complaints:', error.message);
     } finally {
-      setLoading(false);
+      if (!isRefresh) setLoading(false);
+      if (isRefresh) setRefreshing(false);
     }
   };
 
-  // Auto fetch every 15 seconds
   useEffect(() => {
     if (!token) return;
-
-    fetchComplaints(); // initial fetch
+    fetchComplaints(false);
 
     const intervalId = setInterval(() => {
-      fetchComplaints();
+      fetchComplaints(true); // treat as refresh, no loading spinner
     }, 15000);
 
     return () => clearInterval(intervalId);
@@ -51,26 +50,21 @@ const HomeScreen = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchComplaints();
+      fetchComplaints(false);
     }, [token])
   );
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchComplaints();
-    setRefreshing(false);
-  };
+  const onRefresh = () => fetchComplaints(true);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Pending Complaints</Text>
 
-      {/* Add Refresh button */}
       <View style={{ marginBottom: 10 }}>
-        <Button title="Refresh" onPress={fetchComplaints} />
+        <Button title="Refresh" onPress={() => fetchComplaints(true)} />
       </View>
 
-      {loading ? (
+      {loading && complaints.length === 0 ? (
         <ActivityIndicator size="large" color="#007bff" />
       ) : complaints.length === 0 ? (
         <Text style={styles.emptyText}>No pending complaints.</Text>

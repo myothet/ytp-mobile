@@ -55,6 +55,7 @@ function RootNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Welcome" component={Welcome} />
       <Stack.Screen name="AuthFlow" component={AuthFlow} />
+      
     </Stack.Navigator>
   );
 }

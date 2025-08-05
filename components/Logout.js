@@ -7,7 +7,7 @@ export default function Logout({ navigation }) {
 
   useEffect(() => {
     logout();
-    navigation.replace('Login'); // or Welcome
+    navigation.replace('AuthFlow', { screen: 'Login' });// or Welcome
   }, []);
 
   return (

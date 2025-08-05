@@ -76,10 +76,13 @@ const ComplaintDetail = ({ route, navigation }) => {
           <Text style={styles.label}>Customer: {complaint.customer_name}</Text>
           <Text style={styles.label}>Phone:</Text>
           {complaint.contact_phone?.split(',').map((num, idx) => (
-          <Text key={idx} style={styles.detail}>📞 {num.trim()}</Text>
+          <Text selectable  key={idx} style={styles.detail}>📞 {num.trim()}</Text>
           ))}
 
-          <Text style={styles.label}>Address: {complaint.address}</Text>
+          <View style={styles.row}>
+             <Text style={styles.label}>Address: </Text>
+            <Text style={styles.detail}>{complaint.address}</Text>
+          </View>
           <Text style={styles.label}>DN/SN: {complaint.DN}/{complaint.Sn}</Text>
           <Text style={styles.label}>Details:</Text>
           <Text style={styles.detail}>{complaint.complaint_details}</Text>
@@ -127,8 +130,22 @@ const ComplaintDetail = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: { padding: 20 },
-  label: { fontSize: 16, fontWeight: '600', marginTop: 10 },
-  detail: { fontSize: 15, color: '#333', marginBottom: 20 },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    marginTop: 10,
+  },
+  
+  label: { fontSize: 16, fontWeight: '600', marginTop: 10},
+  detail: {
+    fontSize: 15,
+    color: '#333',
+    marginBottom: 20,
+    flexShrink: 1,
+    flexGrow: 1,
+  },
+  
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
